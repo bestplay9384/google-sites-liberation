@@ -17,18 +17,20 @@
 package com.google.sites.liberation.export;
 
 import com.google.gdata.client.sites.SitesService;
-import com.google.gdata.util.ServiceException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.sites.liberation.imprt.SiteImporter;
+import com.google.sites.liberation.imprt.SiteImporterModule;
+import com.google.sites.liberation.util.Auth;
 import com.google.sites.liberation.util.StdOutProgressListener;
-
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Processes command line arguments for exporting a site and then
@@ -37,58 +39,75 @@ import java.util.logging.Logger;
  * @author bsimon@google.com (Benjamin Simon)
  */
 public class Main {
+  //private static final Logger LOGGER = Logger.getLogger(Main.class.getCanonicalName());
 
-  private static final Logger LOGGER = Logger.getLogger(
-      Main.class.getCanonicalName());
-  
-  @Option(name="-u", usage="username with which to authenticate")
-  private String username = null;
-  
-  @Option(name="-p", usage="password with which to authenticate")
-  private String password = null;
-  
+  private static Auth auth = new Auth();
+
+  private boolean exportRevisions = false;
+  private String host = "sites.google.com";
+
+  @Option(name="-t", usage="generated auth token")
+  private String token = null;
+
   @Option(name="-d", usage="domain of site")
   private String domain = null;
   
   @Option(name="-w", usage="webspace of site")
   private String webspace = null;
-  
-  @Option(name="-r", usage="export revisions as well as current content")
-  private boolean exportRevisions = false;
-  
-  @Option(name="-f", usage="directory in which to export")
-  private File directory = new File("");
-  
-  @Option(name="-h", usage="host")
-  private String host = "sites.google.com";
-  
+
+  @Option(name="-p", usage="directory/path in which to export")
+  private String path = null;
+
+  @Option(name="-opt", usage="choose option - export/import (default export)")
+  private String option = "export";
+
   private void doMain(String[] args) {
     CmdLineParser parser = new CmdLineParser(this);
-    Injector injector = Guice.createInjector(new SiteExporterModule());
-    SiteExporter siteExporter = injector.getInstance(SiteExporter.class);
+    //System.out.println( new File(".").getAbsolutePath());
+
     try {
       parser.parseArgument(args);
-      if (webspace == null) {
+      auth.loadConfig(token);
+
+
+      if (webspace == null)
         throw new CmdLineException("Webspace of site not specified!");
+
+      if(domain == null)
+        throw new CmdLineException("Domain is not specified!");
+
+      if(path == null) {
+        throw new CmdLineException("Directory is not specified!");
       }
-      SitesService sitesService = new SitesService("google-sites-liberation");
-      if (username != null && password != null) {
-        if (!username.contains("@") && domain != null) {
-          username += '@' + domain;
-        }
-        sitesService.setUserCredentials(username, password);
+      else {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss"); Date date = new Date();
+        path = path + "\\" + dateFormat.format(date);
       }
-      siteExporter.exportSite(host, domain, webspace, exportRevisions,
-          sitesService, directory, new StdOutProgressListener());
+
+      System.out.println("Selected Mode: " + option.toUpperCase());
+
+      SitesService sitesService = new SitesService("sites-liberation-5");
+      sitesService.setOAuth2Credentials(auth.credential);
+
+      if(option.equals("export")) {
+          Injector injector = Guice.createInjector(new SiteExporterModule());
+          SiteExporter siteExporter = injector.getInstance(SiteExporter.class);
+          siteExporter.exportSite(host, domain, webspace, exportRevisions, sitesService, new File(path), new StdOutProgressListener());
+      }
+
+      if(option.equals("import")) {
+          Injector injector = Guice.createInjector(new SiteImporterModule());
+          SiteImporter siteImporter = injector.getInstance(SiteImporter.class);
+          siteImporter.importSite(host, domain, webspace, exportRevisions, sitesService, new File(path), new StdOutProgressListener());
+      }
+
     } catch (CmdLineException e) {
-      LOGGER.log(Level.SEVERE, e.getMessage());
       parser.printUsage(System.err);
       return;
-    } catch (ServiceException e) {
-        LOGGER.log(Level.SEVERE, "Invalid User Credentials!");
-        LOGGER.log(Level.SEVERE, "Try OAuth2 Credentials by the GUI Version!");
-      throw new RuntimeException(e);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
+
   }
   
   /**

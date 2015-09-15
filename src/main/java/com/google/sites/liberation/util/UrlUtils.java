@@ -17,11 +17,11 @@
 package com.google.sites.liberation.util;
 
 import com.google.gdata.util.common.base.Nullable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Provides utility methods for dealing with URL's.
@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  */
 public class UrlUtils {
 
-  private static final Logger LOGGER = Logger.getLogger(
+  private static final Logger LOGGER = LogManager.getLogger(
       UrlUtils.class.getCanonicalName());  
   
   /**
@@ -45,7 +45,7 @@ public class UrlUtils {
         return new URL("https://" + host + "/a/" + domain + "/" + webspace);
       }
     } catch (MalformedURLException e) {
-      LOGGER.log(Level.WARNING, "Invalid host, domain, or webspace!");
+      LOGGER.error("Invalid host, domain, or webspace!", e);
       throw new RuntimeException(e);
     }
   }
@@ -59,11 +59,22 @@ public class UrlUtils {
       if (domain == null) {
         return new URL("https://" + host + "/feeds/content/site/" + webspace);
       } else {
-        return new URL("https://" + host + "/feeds/content/" + domain + "/" 
-            + webspace);
+        return new URL("https://" + host + "/feeds/content/" + domain + "/" + webspace);
       }
     } catch (MalformedURLException e) {
-      LOGGER.log(Level.WARNING, "Invalid host, domain, or webspace!");
+      LOGGER.error("Invalid host, domain, or webspace!");
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Returns url to get all webspaces from domain user has access to.
+   */
+  public static URL getUserWebspacesURL(String host, String domain) {
+    try {
+      return new URL("https://" + host + "/feeds/site/" + domain);
+    } catch (MalformedURLException e) {
+      LOGGER.error("Invalid host or domain!");
       throw new RuntimeException(e);
     }
   }

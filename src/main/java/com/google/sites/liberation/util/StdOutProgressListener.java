@@ -15,6 +15,8 @@
  */
 
 package com.google.sites.liberation.util;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Implementation of ProgressListener that uses standard out to report the
@@ -24,19 +26,23 @@ package com.google.sites.liberation.util;
  */
 public class StdOutProgressListener implements ProgressListener {
 
+  private static final Logger LOGGER = LogManager.getLogger(StdOutProgressListener.class.getCanonicalName());
   private double progress;
   private String status;
   
   @Override
   public void setProgress(double progress) {
     this.progress = progress;
-    System.out.println("Current progress: " + (int)(progress*100) + "%.");
+    String progressString = "Current progress: " + (int)(progress*100) + "%.";
+    LOGGER.info(progressString);
+    System.out.println(progressString);
   }
 
   @Override
   public void setStatus(String status) {
     this.status = status;
     System.out.println(status);
+    LOGGER.info(status);
   }
 
   @Override

@@ -6,8 +6,8 @@ import com.google.gdata.util.ServiceException;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Inserts individual entries to a feed.
@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  */
 final class EntryInserterImpl implements EntryInserter {
 
-  private static final Logger LOGGER = Logger.getLogger(
+  private static final Logger LOGGER = LogManager.getLogger(
       EntryUpdaterImpl.class.getCanonicalName());
   
   @Override
@@ -25,10 +25,10 @@ final class EntryInserterImpl implements EntryInserter {
     try {
       return sitesService.insert(feedUrl, entry);
     } catch (IOException e) {
-      LOGGER.log(Level.WARNING, "Unable to insert entry: " + entry, e);
+      LOGGER.warn("Unable to insert entry: " + entry, e);
       return null;
     } catch (ServiceException e) {
-      LOGGER.log(Level.WARNING, "Unable to insert entry: " + entry, e);
+      LOGGER.warn("Unable to insert entry: " + entry, e);
       return null;
     }
   }

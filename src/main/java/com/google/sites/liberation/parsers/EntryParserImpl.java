@@ -22,8 +22,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Parses an html element representing an entry.
@@ -32,7 +32,7 @@ import java.util.logging.Logger;
  */
 final class EntryParserImpl implements EntryParser {
   
-  private static final Logger LOGGER = Logger.getLogger(
+  private static final Logger LOGGER = LogManager.getLogger(
       EntryParserImpl.class.getCanonicalName());
   
   private final AuthorParser authorParser;
@@ -157,7 +157,7 @@ final class EntryParserImpl implements EntryParser {
     } else if (hasClass(element, "webpage")) {
       entry = new WebPageEntry();
     } else {
-      LOGGER.log(Level.WARNING, "Entry type is undefined!");
+      LOGGER.warn("Entry type is undefined!");
       entry = new WebPageEntry();
     }
     String id = element.getAttribute("id");

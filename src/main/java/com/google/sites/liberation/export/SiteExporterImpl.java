@@ -27,8 +27,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.google.common.collect.Sets;
 import com.google.gdata.client.sites.SitesService;
@@ -48,7 +49,7 @@ import com.google.sites.liberation.util.UrlUtils;
  */
 final class SiteExporterImpl implements SiteExporter {
   
-  private static final Logger LOGGER = Logger.getLogger(
+  private static final Logger LOGGER = LogManager.getLogger(
       SiteExporterImpl.class.getCanonicalName());
   
   private final AbsoluteLinkConverter linkConverter;
@@ -118,7 +119,7 @@ final class SiteExporterImpl implements SiteExporter {
         }
         num++;
       } else {
-        LOGGER.log(Level.WARNING, "Error parsing entries!");
+        LOGGER.warn("Error parsing entries!");
       }
     }
     
@@ -154,21 +155,20 @@ final class SiteExporterImpl implements SiteExporter {
     }
   }
   
-  private void exportPage(BaseContentEntry<?> page, File directory, 
-      EntryStore entryStore, boolean revisionsExported) {
+  private void exportPage(BaseContentEntry<?> page, File directory, EntryStore entryStore, boolean revisionsExported) {
     File file = new File(directory, "index.html");
     Appendable out = null;
     try {
       out = appendableFactory.getAppendable(file);
       pageExporter.exportPage(page, entryStore, out, revisionsExported);
     } catch (IOException e) {
-      LOGGER.log(Level.SEVERE, "Failed writing to file: " + file.getPath(), e);
+      LOGGER.error("Failed writing to file: " + file.getPath(), e);
     } finally {
       if (out instanceof Closeable) {
         try {
           ((Closeable) out).close();
         } catch (IOException e) {
-          LOGGER.log(Level.SEVERE, "Failed closing file: " + file.getPath(), e);
+          LOGGER.error("Failed closing file: " + file.getPath(), e);
         }
       }
     }

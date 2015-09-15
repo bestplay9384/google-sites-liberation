@@ -40,8 +40,8 @@ import com.google.gdata.util.XmlBlob;
 
 import java.util.Comparator;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Provides utility methods for dealing with BaseContentEntry's.
@@ -50,7 +50,7 @@ import java.util.logging.Logger;
  */
 public class EntryUtils {
 
-  private static final Logger LOGGER = Logger.getLogger(
+  private static final Logger LOGGER = LogManager.getLogger(
       EntryUtils.class.getCanonicalName());  
   
   /**
@@ -88,8 +88,8 @@ public class EntryUtils {
       ((CommentEntry) (BaseContentEntry) entry).setInReplyTo(inReplyTo);
     } else if (getType(entry) == LIST_ITEM) {
       if (getType(parent) != LIST_PAGE) {
-        throw new IllegalStateException("List items can only be descendents of " 
-            + "list pages!");
+        LOGGER.error("List items can only be descendents of list pages!");
+        throw new IllegalStateException("List items can only be descendents of list pages!");
       }
       // TODO(gk5885): remove extra casts for
       // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6302214
@@ -130,13 +130,13 @@ public class EntryUtils {
       }
       return content;
     } catch(IllegalStateException e) {
-      LOGGER.log(Level.WARNING, "Invalid Content", e);
+      LOGGER.error("Invalid Content", e);
       return "";
     } catch(ClassCastException e) {
-      LOGGER.log(Level.WARNING, "Invalid Content", e);
+      LOGGER.error("Invalid Content", e);
       return "";
     } catch(NullPointerException e) {
-      LOGGER.log(Level.WARNING, "Invalid Content", e);
+      LOGGER.error("Invalid Content", e);
       return "";
     }
   }

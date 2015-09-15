@@ -17,8 +17,8 @@ import org.w3c.dom.NodeList;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Implements PageParser to parse an html element for any contained entries.
@@ -27,7 +27,7 @@ import java.util.logging.Logger;
  */
 final class PageParserImpl implements PageParser {
   
-  private static final Logger LOGGER = Logger.getLogger(
+  private static final Logger LOGGER = LogManager.getLogger(
       PageParserImpl.class.getCanonicalName());
   
   private final DocumentProvider documentProvider;
@@ -52,7 +52,7 @@ final class PageParserImpl implements PageParser {
     try {
       document = documentProvider.getDocument(file);
     } catch (IOException e) {
-      LOGGER.log(Level.WARNING, "Error parsing file: " + file);
+      LOGGER.warn("Error parsing file: " + file);
       return null;
     }
     List<BaseContentEntry<?>> entries = Lists.newLinkedList();
@@ -65,6 +65,7 @@ final class PageParserImpl implements PageParser {
           if (node.getNodeType() == Node.ELEMENT_NODE) {
             Element title = (Element) node;
             entry.setTitle(new PlainTextConstruct(title.getTextContent()));
+            // tutaj logowaæ? sprawdziæ co wyrzuca entry w tym wypadku.
             System.out.println(entry);
           }
         }

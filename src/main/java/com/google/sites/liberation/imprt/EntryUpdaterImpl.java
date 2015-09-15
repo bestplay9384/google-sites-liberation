@@ -24,8 +24,8 @@ import com.google.gdata.util.ServiceException;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Updates a single entry.
@@ -34,7 +34,7 @@ import java.util.logging.Logger;
  */
 final class EntryUpdaterImpl implements EntryUpdater {
 
-  private static final Logger LOGGER = Logger.getLogger(
+  private static final Logger LOGGER = LogManager.getLogger(
       EntryUpdaterImpl.class.getCanonicalName());
   
   @Override
@@ -47,13 +47,13 @@ final class EntryUpdaterImpl implements EntryUpdater {
       return sitesService.update(new URL(oldEntry.getId()), newEntry,
           oldEntry.getEtag());
     } catch (IOException e) {
-      LOGGER.log(Level.WARNING, "Unable to update entry:" + oldEntry, e);
+      LOGGER.warn("Unable to update entry:" + oldEntry, e);
       return null;
     } catch (NullPointerException e) {
-      LOGGER.log(Level.WARNING, "Unable to update entry:" + oldEntry, e);
+      LOGGER.warn("Unable to update entry:" + oldEntry, e);
       return null;
     } catch (ServiceException e) {
-      LOGGER.log(Level.WARNING, "Unable to update entry:" + oldEntry, e);
+      LOGGER.warn("Unable to update entry:" + oldEntry, e);
       return null;
     }
   }

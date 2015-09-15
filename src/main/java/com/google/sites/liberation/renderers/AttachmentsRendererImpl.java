@@ -25,8 +25,8 @@ import com.google.sites.liberation.util.EntryType;
 import com.google.sites.liberation.util.XmlElement;
 
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Renders the attachment links in a page.
@@ -35,7 +35,7 @@ import java.util.logging.Logger;
  */
 final class AttachmentsRendererImpl implements AttachmentsRenderer {
   
-  private static final Logger LOGGER = Logger.getLogger(
+  private static final Logger LOGGER = LogManager.getLogger(
         AttachmentsRendererImpl.class.getCanonicalName());
   
   @Override
@@ -58,7 +58,7 @@ final class AttachmentsRendererImpl implements AttachmentsRenderer {
             .addElement(revision).addText(")");
         div.addElement(new XmlElement("br")).addElement(attachmentDiv);
       } else {
-        LOGGER.log(Level.WARNING, "Invalid Attachment Type!");
+        LOGGER.warn("Invalid Attachment Type!");
       }
     }
     return div;

@@ -37,8 +37,8 @@ import com.google.sites.liberation.util.EntryUtils;
 import java.io.File;
 import java.net.URL;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Parses a page and its children and uploads them to a feed.
@@ -47,7 +47,7 @@ import java.util.logging.Logger;
  */
 final class PageImporterImpl implements PageImporter {
 
-  private static final Logger LOGGER = Logger.getLogger(
+  private static final Logger LOGGER = LogManager.getLogger(
       PageImporterImpl.class.getCanonicalName());
   
   private final EntryUpdater entryUpdater;
@@ -79,13 +79,13 @@ final class PageImporterImpl implements PageImporter {
     checkNotNull(directory);
     File file = new File(directory, "index.html");
     if (!file.isFile()) {
-      LOGGER.log(Level.WARNING, "No valid file in directory: " + directory);
+      LOGGER.warn("No valid file in directory: " + directory);
       return null;
     }
     List<BaseContentEntry<?>> entries = pageParser.parsePage(file);
     BasePageEntry<?> page = getFirstPageEntry(entries);
     if (page == null) {
-      LOGGER.log(Level.WARNING, "No valid page entry!");
+      LOGGER.warn("No valid page entry!");
       return null;
     }
     

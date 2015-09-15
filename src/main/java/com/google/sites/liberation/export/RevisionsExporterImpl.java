@@ -31,8 +31,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Exports the history and all of the revisions of a page. 
@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  */
 final class RevisionsExporterImpl implements RevisionsExporter {
   
-  private static Logger LOGGER = Logger.getLogger(
+  private static Logger LOGGER = LogManager.getLogger(
       RevisionsExporterImpl.class.getCanonicalName());
   
   private final AbsoluteLinkConverter linkConverter;
@@ -75,7 +75,7 @@ final class RevisionsExporterImpl implements RevisionsExporter {
     try {
       feedUrl = new URL(page.getId().replace("content", "revision"));
     } catch (MalformedURLException e) {
-      LOGGER.log(Level.WARNING, "Invalid revisions URL!", e);
+      LOGGER.error("Invalid revisions URL!", e);
       return;
     }
     List<BaseContentEntry<?>> revisions = Lists.newLinkedList();
@@ -99,13 +99,13 @@ final class RevisionsExporterImpl implements RevisionsExporter {
       out = appendableFactory.getAppendable(file);
       historyExporter.exportHistory(revisions, out);
     } catch(IOException e) {
-      LOGGER.log(Level.WARNING, "Failed writing to file: " + file, e);
+      LOGGER.error("Failed writing to file: " + file, e);
     } finally {
       if (out instanceof Closeable) {
         try {
           ((Closeable) out).close();
         } catch (IOException e) {
-          LOGGER.log(Level.SEVERE, "Failed closing file: " + file, e);
+          LOGGER.error("Failed closing file: " + file, e);
         }
       }
     }
@@ -120,13 +120,13 @@ final class RevisionsExporterImpl implements RevisionsExporter {
       out = appendableFactory.getAppendable(file);
       revisionExporter.exportRevision(revision, out);
     } catch(IOException e) {
-      LOGGER.log(Level.WARNING, "Failed writing to file: " + file, e);
+      LOGGER.error("Failed writing to file: " + file, e);
     } finally {
       if (out instanceof Closeable) {
         try {
           ((Closeable) out).close();
         } catch (IOException e) {
-          LOGGER.log(Level.SEVERE, "Failed closing file: " + file, e);
+          LOGGER.error("Failed closing file: " + file, e);
         }
       }
     }

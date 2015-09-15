@@ -1,10 +1,6 @@
-# Google Sites Import/Export Tool
+# Google Sites Import/Export Tool (Console Version)
 
 This is an import/export tool for [Google Sites](http://sites.google.com/).  Using [HTML Microformats](http://microformats.org/) it generates an XHTML version of Sites content suitable for offline browsing and simple HTTP hosting, which is also able to be losslessly imported back into sites.
-
-Download the version [1.0.6](https://sih4sing5hong5.github.io/google-sites-liberation/jar/google-sites-liberation-1.0.6-jar-with-dependencies.jar) and execute it now!
-
-![http://google-sites-liberation.googlecode.com/files/gui.png](http://google-sites-liberation.googlecode.com/files/gui.png)
 
 ## User's Guide
 
@@ -12,11 +8,15 @@ The Sites Liberation import/export tool uses the Sites GData API to allow users 
 
 ### Simple Execution
 
-Download the version [1.0.6](https://sih4sing5hong5.github.io/google-sites-liberation/jar/google-sites-liberation-1.0.6-jar-with-dependencies.jar) now! The tool has been packaged as an executable jar.  If [Java](http://java.sun.com/) is installed, just **double-click on it**.
+UNIX:
 
-You can run it in command line, too.
 ```bash
-java -jar google-sites-liberation-1.0.6-jar-with-dependencies.jar
+sh run.sh
+```
+
+WINDOWS:
+```bash
+run.bat
 ```
 
 ### Advanced Execution
@@ -25,17 +25,28 @@ The tool is written in Java and the source code is currently hosted at code.goog
 
 | Name | Flag | Usage |
 |:-----|:-----|:------|
-| Host | `-h` | If not sites.google.com, specifies the Site's host (optional).  Used for debugging. |
-| Domian | `-d` | If the site is a Google Apps site, specifies the domain, e.g. dataliberation.org (optional). |
-| Webspace | `-w` | Specifies the webspace of the Site, e.g. "dataliberation" for a site located at `http://sites.google.com/a/domain/dataliberation` |
-| Username | `-u` | Specifies the user name used to access the Site. |
-| Password | `-p` | Specifies the password used to access the Site. |
-| Directory | `-f` | Specifies the root directory to export to / import from. |
+| Mode | `-o` | Mode of application - import/export (default: export). |
+| Domain | `-d` | If the site is a Google Apps site, specifies the domain, e.g. dataliberation.org (optional). |
+| Webspace | `-w` | Specifies the webspace of the Site, e.g. "dataliberation" for a site located at `http://sites.google.com/a/domain/dataliberation`. Value: ALL, means get all webspaces from specified domain which you do have access to. If you want to get many webspaces by specifying them you should separate them with commas - ex. `-w site1,site2,site3` |
+| Token | `-t` | Token needed to generate token config file which allows to use application with no need to give google app access with every single session. |
+| Directory | `-p` | Specifies the root directory to export to / import from. |
 | Revisions | `-r` | If this flag is included, then the revisions of all of the pages in the Site will be exported/imported as well as the current page (optional). |
+| External File | `-e` | Gives possibility to load external .properties file with list of webspaces (optional). You can find example file in config directory (websiteList.properties). |
+
+Example usage: 
+```bash
+sh run.sh -d domain.com -w webspace -d saveInThisDir
+```
+
+or on Windows
+
+```bash
+run.bat -d domain.com -w webspace -d saveInThisDir
+```
 
 ### Structure
 
-The folder structure of an exported site is meant to mimic the Sites UI as closely as possible. Thus if exporting to a directory "rootdirectory," a top-level page normally located at webspace/pagename, would be in a file named index.html, located in rootdirectory/pagename. A subpage of that page, normally located at webspace/pagename/subpage, would be in a file named index.html in rootdirectory/pagename/subpage. Attachments are downloaded to the same directory as the index.html page to which they belong, and if revisions are exported, they will be located in a directory called "_revisions" within the directory containing the index.html file. Each revision will be in its own file named [number](revision.md).html. Additionally, if revisions are exported, a file named "history.html" will be placed in the same directory as the index.html file, containing links to all of the revisions of the page. However, the history.html file is not used for import, and thus may be omitted even when importing revisions._
+All exports/imports are placed in specified path (given while running application). There you can find directories named by datetime of dump. Inside each are located directories named exactly like webspace they are relevant to. Inside each are located contents of google site. The folder structure of an exported site is meant to mimic the Sites UI as closely as possible. Thus if exporting to a directory "rootdirectory," a top-level page normally located at webspace/pagename, would be in a file named index.html, located in rootdirectory/pagename. A subpage of that page, normally located at webspace/pagename/subpage, would be in a file named index.html in rootdirectory/pagename/subpage. Attachments are downloaded to the same directory as the index.html page to which they belong, and if revisions are exported, they will be located in a directory called "_revisions" within the directory containing the index.html file. Each revision will be in its own file named [number](revision.md).html. Additionally, if revisions are exported, a file named "history.html" will be placed in the same directory as the index.html file, containing links to all of the revisions of the page. However, the history.html file is not used for import, and thus may be omitted even when importing revisions.
 
 ### Format
 
@@ -61,33 +72,17 @@ The parent link and pageName elements in the GData feeds are not embedded in the
   * The id attribute is used to store entry id's. However, these id's are URL's and this may not constitute valid html.
 
 ## Development
-[![Build Status](https://travis-ci.org/sih4sing5hong5/google-sites-liberation.svg?branch=master)](https://travis-ci.org/sih4sing5hong5/google-sites-liberation)
-
   The latest, most stable version of the code will always be located in the `master` branch.  See the revision history for information about the code in any other branch.
-
   Note:  This project is built using Maven (http://maven.apache.org/).
   
 ### REQUIREMENTS
-  This project is built using Java 1.5 or later.  All other dependencies are managed by Maven.
-
-#### Preparation with Ubuntu 14.04
-```
-sudo apt-get install -y openjdk-7-jdk maven2
-```
-
-### COMPILE
-  To compile this project, execute `mvn compile`.
+  This project is built using Java 1.5 or later (JDK).  All other dependencies are managed by Maven.
 
 ### TEST
   To run the tests, execute `LANG=en_us mvn test -Djava.util.logging.config.file=SEVERE`.
 
-### JAR
-  To package this project into a jar, execute `LANG=en_us mvn package`.  The jar will be located in the
-  `target` directory.
-
-### EXECUTABLE JAR
-  To create a double-clickable, executable jar, execute `LANG=en_us mvn assembly:assembly`.  The jar will be
-  located in the `target` directory with a `-jar-with-dependencies.jar` suffix.
+### DISTRIBUTION
+  To compile this project in final distribution zip including all configs, jar, ans run bash script execute `mvn assembly:assembly`.
 
 ### Reference
 * [Google Developers Console](https://console.developers.google.com/project)

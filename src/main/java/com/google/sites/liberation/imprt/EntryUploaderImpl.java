@@ -45,8 +45,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Uploads (updates if possible, otherwise inserts) an entry to a given feed URL.
@@ -55,7 +55,7 @@ import java.util.logging.Logger;
  */
 final class EntryUploaderImpl implements EntryUploader {
 
-  private static final Logger LOGGER = Logger.getLogger(
+  private static final Logger LOGGER = LogManager.getLogger(
       EntryUploaderImpl.class.getCanonicalName());
   
   private final EntryInserter entryInserter;
@@ -139,10 +139,10 @@ final class EntryUploaderImpl implements EntryUploader {
       }
       return false;
     } catch(IOException e) {
-      LOGGER.log(Level.WARNING, "Error communicating with the server.", e);
+      LOGGER.error("Error communicating with the server.", e);
       return false;
     } catch (ServiceException e) {
-      LOGGER.log(Level.WARNING, "Error communicating with the server.", e);
+      LOGGER.error("Error communicating with the server.", e);
       return false;
     }
   }
@@ -183,10 +183,10 @@ final class EntryUploaderImpl implements EntryUploader {
       }
       return false;
     } catch (IOException e) {
-      LOGGER.log(Level.WARNING, "Error communicating with the server.", e);
+      LOGGER.error("Error communicating with the server.", e);
       return false;
     } catch (ServiceException e) {
-      LOGGER.log(Level.WARNING, "Error communicating with the server.", e);
+      LOGGER.error("Error communicating with the server.", e);
       return false;
     }
   }

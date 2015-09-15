@@ -16,41 +16,12 @@
 
 package com.google.sites.liberation.util;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.border.EmptyBorder;
-
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
+import com.google.api.client.googleapis.auth.oauth2.GoogleRefreshTokenRequest;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -62,6 +33,23 @@ import com.google.sites.liberation.export.SiteExporterModule;
 import com.google.sites.liberation.imprt.SiteImporter;
 import com.google.sites.liberation.imprt.SiteImporterModule;
 
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Provides a GUI for initiating a Sites import or export.
  * 
@@ -69,18 +57,19 @@ import com.google.sites.liberation.imprt.SiteImporterModule;
  */
 public class GuiMain {
 
-  private static final Logger LOGGER = Logger.getLogger(GuiMain.class
-      .getCanonicalName());
+  private static final Logger LOGGER = Logger.getLogger(GuiMain.class.getCanonicalName());
 
-  private List<String> SCOPES = Arrays
-      .asList("https://sites.google.com/feeds");
-  private String CLIENT_ID = "457238310484-d7jjdra9vvij0ubk3k7vr59n8cb7eceh.apps.googleusercontent.com";
+  private List<String> SCOPES = Arrays.asList("https://sites.google.com/feeds");
+  private String CLIENT_ID = "448508769873-or0oc515d6soeil0rpb3q9hg4hl99uek.apps.googleusercontent.com";
+  private String CLIENT_SECRET = "HZuOlJcNEGFDDcT6n9oWayJI";
   private String REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
+  private String REFRESH_TOKEN = "1/zVjvf9yULDNmvxaG6KZbq3sXPsfP0I7diqbbXx7RdkY";
   private Credential credential = null;
-
+  //private String authToken = null;
+  //private String authTokenRefresh = null;
   private JFrame optionsFrame;
   private JFrame progressFrame;
-  private JTextField hostField;
+  //private JTextField hostField;
   private JTextField domainField;
   private JTextField webspaceField;
   private JTextField tokenField;
@@ -112,32 +101,36 @@ public class GuiMain {
     JPanel mainPanel = new JPanel();
     GridLayout layout = new GridLayout(0, 2);
     mainPanel.setLayout(layout);
-    mainPanel.add(new JLabel(" Host: "));
-    hostField = new JTextField("sites.google.com");
-    mainPanel.add(hostField);
+    //mainPanel.add(new JLabel(" Host: "));
+    //hostField = new JTextField("sites.google.com");
+    //mainPanel.add(hostField);
     mainPanel.add(new JLabel(" Domain: "));
     domainField = new JTextField();
     mainPanel.add(domainField);
     mainPanel.add(new JLabel(" Webspace: "));
     webspaceField = new JTextField();
     mainPanel.add(webspaceField);
-    mainPanel.add(new JLabel(" Import/Export Revisions: "));
+    //mainPanel.add(new JLabel(" Import/Export Revisions: "));
     revisionsCheckBox = new JCheckBox();
-    mainPanel.add(revisionsCheckBox);
+    //mainPanel.add(revisionsCheckBox);
     fileField = new JTextField();
     fileField.setEditable(false);
     fileChooser = new JFileChooser();
     JButton directoryButton = new JButton("Choose Target Directory");
     fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
     directoryButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
         int result = fileChooser.showOpenDialog(optionsFrame);
         if (result == JFileChooser.APPROVE_OPTION) {
+          DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss"); Date date = new Date();
+          fileChooser.setSelectedFile(new File(fileChooser.getSelectedFile().getPath() + "\\" + dateFormat.format(date)));
           fileField.setText(fileChooser.getSelectedFile().getPath());
         }
       }
     });
+
     mainPanel.add(directoryButton);
     mainPanel.add(fileField);
 
@@ -148,9 +141,9 @@ public class GuiMain {
         openBrowserAndGetToken();
       }
     });
-    mainPanel.add(openBrowserButton);
+    //mainPanel.add(openBrowserButton);
     tokenField = new JTextField();
-    mainPanel.add(tokenField);
+    //mainPanel.add(tokenField);
 
     mainPanel.add(new JPanel());
     mainPanel.add(new JPanel());
@@ -220,19 +213,19 @@ public class GuiMain {
     progressFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
   }
 
+  private String generateAuthUrl() {
+    GoogleAuthorizationCodeRequestUrl x = new GoogleAuthorizationCodeRequestUrl(CLIENT_ID, REDIRECT_URI, SCOPES).setAccessType("offline").setApprovalPrompt("force");
+    return x.build();
+  }
+
   private void openBrowserAndGetToken() {
-    // Step 1: Authorize -->
-    String authorizationUrl = new GoogleAuthorizationCodeRequestUrl(
-        CLIENT_ID, REDIRECT_URI, SCOPES).build();
     try {
-      // Point or redirect your user to the authorizationUrl.
-      java.awt.Desktop.getDesktop().browse(new URI(authorizationUrl));
+      java.awt.Desktop.getDesktop().browse(new URI(generateAuthUrl()));
     } catch (URISyntaxException e) {
       e.printStackTrace();
     } catch (IOException e) {
       e.printStackTrace();
     }
-    // End of Step 1 <--
   }
 
   /**
@@ -241,24 +234,45 @@ public class GuiMain {
    * @return OAuth 2.0 Credential instance.
    * @throws IOException
    */
-  private Credential getCredentials() throws IOException {
+  /*private Credential getCredentials() throws IOException {
     String code = tokenField.getText();
     HttpTransport transport = new NetHttpTransport();
     JacksonFactory jsonFactory = new JacksonFactory();
-    String CLIENT_SECRET = "EPME5fbwiNLCcMsnj3jVoXeY";
+    GoogleTokenResponse response = new GoogleAuthorizationCodeTokenRequest(transport, jsonFactory, CLIENT_ID, CLIENT_SECRET, code, REDIRECT_URI).execute();
 
-    // Step 2: Exchange -->
-    GoogleTokenResponse response = new GoogleAuthorizationCodeTokenRequest(
-        transport, jsonFactory, CLIENT_ID, CLIENT_SECRET, code,
-        REDIRECT_URI).execute();
-    // End of Step 2 <--
-
-    // Build a new GoogleCredential instance and return it.
     return new GoogleCredential.Builder()
         .setClientSecrets(CLIENT_ID, CLIENT_SECRET)
         .setJsonFactory(jsonFactory).setTransport(transport).build()
         .setAccessToken(response.getAccessToken())
         .setRefreshToken(response.getRefreshToken());
+  }*/
+
+  private Credential refreshAccessToken() throws IOException {
+      HttpTransport transport = new NetHttpTransport();
+      JacksonFactory jsonFactory = new JacksonFactory();
+      TokenResponse response = new TokenResponse();
+
+    try {
+      response = new GoogleRefreshTokenRequest(transport, jsonFactory, REFRESH_TOKEN, CLIENT_ID, CLIENT_SECRET).execute();
+    } catch (TokenResponseException e) {
+      if (e.getDetails() != null) {
+        System.err.println("Error: " + e.getDetails().getError());
+        if (e.getDetails().getErrorDescription() != null) {
+          System.err.println(e.getDetails().getErrorDescription());
+        }
+        if (e.getDetails().getErrorUri() != null) {
+          System.err.println(e.getDetails().getErrorUri());
+        }
+      } else {
+        System.err.println(e.getMessage());
+      }
+    }
+
+    return new GoogleCredential.Builder()
+              .setClientSecrets(CLIENT_ID, CLIENT_SECRET)
+              .setJsonFactory(jsonFactory).setTransport(transport).build()
+              .setAccessToken(response.getAccessToken());
+
   }
 
   private void startAction(boolean export) {
@@ -271,25 +285,36 @@ public class GuiMain {
   }
 
   private boolean checkArguments() {
-    if (hostField.getText().equals("")) {
+    /*if (hostField.getText().equals("")) {
       error("Please provide a host name.");
       return false;
-    }
+    }*/
     if (webspaceField.getText().equals("")) {
       error("Please provide a webspace (site name).");
       return false;
     }
-    if (tokenField.getText().equals("")) {
+    /*if (tokenField.getText().equals("")) {
       error("Please provide a token.");
       return false;
-    }
+    }*/
     if (fileChooser.getSelectedFile() == null) {
       error("Please provide a target directory.");
       return false;
     }
     try {
-      if (credential == null)
-        credential = getCredentials();
+      if (credential == null) {
+        //credential = getCredentials();
+        credential = refreshAccessToken();
+      }
+
+
+      /*String accessToken = credential.getAccessToken();
+      System.out.println("Access token before: " + accessToken);
+      credential.refreshToken();
+      accessToken = credential.getAccessToken();
+      System.out.println("Access token after: " + accessToken);*/
+
+
     } catch (TokenResponseException e) {
       error("The token is invalid!");
       return false;
@@ -323,9 +348,9 @@ public class GuiMain {
 
     @Override
     public void run() {
-      String host = hostField.getText();
-      String domain = (domainField.getText().equals("")) ? null
-          : domainField.getText();
+      //String host = hostField.getText();
+      String host = "sites.google.com";
+      String domain = (domainField.getText().equals("")) ? null : domainField.getText();
       String webspace = webspaceField.getText();
       boolean revisions = revisionsCheckBox.isSelected();
       File directory = fileChooser.getSelectedFile();
@@ -341,7 +366,7 @@ public class GuiMain {
         Injector injector = Guice.createInjector(new SiteImporterModule());
         SiteImporter siteImporter = injector.getInstance(SiteImporter.class);
         siteImporter.importSite(host, domain, webspace, revisions,
-            sitesService, directory, new GuiProgressListener(progressBar, textArea));
+                sitesService, directory, new GuiProgressListener(progressBar, textArea));
       }
       doneButton.setEnabled(true);
     }

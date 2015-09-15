@@ -16,28 +16,21 @@
 
 package com.google.sites.liberation.renderers;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.sites.liberation.util.EntryType.ATTACHMENT;
-import static com.google.sites.liberation.util.EntryType.COMMENT;
-import static com.google.sites.liberation.util.EntryType.WEB_ATTACHMENT;
-import static com.google.sites.liberation.util.EntryType.getType;
-import static com.google.sites.liberation.util.EntryType.isPage;
-
 import com.google.gdata.data.OutOfLineContent;
 import com.google.gdata.data.Person;
 import com.google.gdata.data.TextConstruct;
 import com.google.gdata.data.sites.BaseContentEntry;
 import com.google.sites.liberation.util.EntryUtils;
 import com.google.sites.liberation.util.XmlElement;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.sites.liberation.util.EntryType.*;
 /**
  * Provides utility methods to construct various XmlElement's.
  * 
@@ -45,7 +38,7 @@ import java.util.logging.Logger;
  */
 final class RendererUtils {
   
-  private static final Logger LOGGER = Logger.getLogger(
+  private static final Logger LOGGER = LogManager.getLogger(
       RendererUtils.class.getCanonicalName());
   
   private static final DateTimeFormatter formatter = new DateTimeFormatterBuilder()
@@ -98,7 +91,7 @@ final class RendererUtils {
       String xhtmlContent = EntryUtils.getXhtmlContent(entry);
       element.addXml(xhtmlContent);
     } else {
-      LOGGER.log(Level.WARNING, "Only pages and comments have xhtml content!");
+      LOGGER.warn("Only pages and comments have xhtml content!");
     }
     return element;
   }
@@ -119,7 +112,7 @@ final class RendererUtils {
     } else if (getType(entry) == WEB_ATTACHMENT) {
       href = ((OutOfLineContent) entry.getContent()).getUri();
     } else {
-      LOGGER.log(Level.WARNING, "Only attachments have out of line content!");
+      LOGGER.warn("Only attachments have out of line content!");
       href = "";
     }
     element.setAttribute("href", href);

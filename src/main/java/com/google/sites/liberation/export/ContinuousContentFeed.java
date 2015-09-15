@@ -16,9 +16,6 @@
 
 package com.google.sites.liberation.export;
 
-import static com.google.gdata.util.common.base.Preconditions.checkNotNull;
-import static com.google.gdata.util.common.base.Preconditions.checkArgument;
-
 import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.Iterators;
 import com.google.gdata.client.Query;
@@ -28,13 +25,16 @@ import com.google.gdata.data.sites.BaseContentEntry;
 import com.google.gdata.util.ServiceException;
 import com.google.gdata.util.common.base.Pair;
 import com.google.sites.liberation.util.EntryProvider;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import static com.google.gdata.util.common.base.Preconditions.checkArgument;
+import static com.google.gdata.util.common.base.Preconditions.checkNotNull;
 
 /**
  * Provides a continuous iterable of entries even if the results of 
@@ -49,7 +49,7 @@ import java.util.logging.Logger;
  */
 final class ContinuousContentFeed implements Iterable<BaseContentEntry<?>> {
 
-  private static final Logger LOGGER = Logger.getLogger(
+  private static final Logger LOGGER = LogManager.getLogger(
       ContinuousContentFeed.class.getCanonicalName());
   
   private final EntryProvider entryProvider;
@@ -153,7 +153,7 @@ final class ContinuousContentFeed implements Iterable<BaseContentEntry<?>> {
     private Pair<Iterator<BaseContentEntry<?>>, Integer> 
         catchException(Exception e, int start, int num) {
       String message = "Error retrieving response from query.";
-      LOGGER.log(Level.WARNING, message, e);
+      LOGGER.warn(message, e);
       if (num == 1) {
         Iterator<BaseContentEntry<?>> itr = Iterators.emptyIterator();
         return Pair.of(itr, 1);
